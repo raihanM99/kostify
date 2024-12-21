@@ -9,10 +9,20 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use App\Models\BoardingHouse;
 use Filament\Resources\Resource;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Tabs;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Tabs\Tab;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Filament\Resources\BoardingHouseResource\Pages;
 use App\Filament\Resources\BoardingHouseResource\RelationManagers;
+use Filament\Forms\Components\Toggle;
 
 class BoardingHouseResource extends Resource
 {
@@ -24,24 +34,24 @@ class BoardingHouseResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Tabs::make('Tabs')
+                Tabs::make('Tabs')
                     ->tabs([
-                        Forms\Components\Tabs\Tab::make('General Information')
+                        Tab::make('General Information')
                             ->schema([
-                                Forms\Components\Grid::make()
+                                Grid::make()
                                     ->schema([
-                                        Forms\Components\TextInput::make('name')
+                                        TextInput::make('name')
                                             ->required()
                                             ->debounce(500)
                                             ->reactive()
                                             ->afterStateUpdated(function ($state, callable $set) {
                                                 $set('slug', Str::slug($state));
                                             }),
-                                        Forms\Components\TextInput::make('slug')
+                                        TextInput::make('slug')
                                             ->required()
                                             ->readOnly()
                                     ]),
-                                Forms\Components\TextInput::make('price')
+                                TextInput::make('price')
                                     ->numeric()
                                     ->prefix('IDR')
                                     ->required()
@@ -51,28 +61,73 @@ class BoardingHouseResource extends Resource
                                         $set('price', str_replace(',', '', $state));
                                     })
                                     ->placeholder('e.g., 50000'),
-                                Forms\Components\Select::make('city_id')
+                                Select::make('city_id')
                                     ->relationship('city', 'name')
                                     ->required(),
-                                Forms\Components\Select::make('category_id')
+                                Select::make('category_id')
                                     ->relationship('category', 'name')
                                     ->required(),
-                                Forms\Components\Textarea::make('address')
+                                TextArea::make('address')
                                     ->required(),
-                                Forms\Components\RichEditor::make('description')
+                                RichEditor::make('description')
                                     ->required(),
-                                Forms\Components\FileUpload::make('thumbnail')
+                                FileUpload::make('thumbnail')
                                     ->image()
                                     ->directory('boarding_house')
                                     ->required()
                             ]),
-                        Forms\Components\Tabs\Tab::make('Tab 2')
+                        Tab::make('Bonus')
                             ->schema([
-                                // ...
+                                Repeater::make('bonuses')
+                                    ->relationship('bonuses')
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->required(),
+                                        TextArea::make('description')
+                                            ->required(),
+                                        FileUpload::make('image')
+                                            ->image()
+                                            ->directory('bonuses')
+                                            ->required()
+                                    ])
                             ]),
-                        Forms\Components\Tabs\Tab::make('Tab 3')
+                        Tab::make('Rooms')
                             ->schema([
-                                // ...
+                                Repeater::make('rooms')
+                                    ->relationship('rooms')
+                                    ->schema([
+                                        TextInput::make('name')
+                                            ->required(),
+                                        TextInput::make('room_type')
+                                            ->required(),
+                                        TextInput::make('capacity')
+                                            ->numeric()
+                                            ->required(),
+                                        TextInput::make('square_feet')
+                                            ->numeric()
+                                            ->required(),
+                                        TextInput::make('price_per_month')
+                                            ->numeric()
+                                            ->prefix('IDR')
+                                            ->required()
+                                            ->reactive()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                // Remove commas if any (clean up input)
+                                                $set('price', str_replace(',', '', $state));
+                                            })
+                                            ->placeholder('e.g., 50000'),
+                                        Toggle::make('is_available')
+                                            ->required()
+                                            ->label('Available'),
+                                        Repeater::make('images')
+                                            ->relationship('images')
+                                            ->schema([
+                                                FileUpload::make('image')
+                                                    ->image()
+                                                    ->directory('rooms')
+                                                    ->required()
+                                            ])
+                                    ])
                             ]),
                     ])->columnSpan(2),
             ]);
@@ -85,6 +140,9 @@ class BoardingHouseResource extends Resource
                 Tables\Columns\ImageColumn::make('thumbnail'),
                 Tables\Columns\TextColumn::make('name'),
                 Tables\Columns\TextColumn::make('formatted_price')
+                    ->label('Price'),
+                Tables\Columns\TextColumn::make('category.name'),
+                Tables\Columns\TextColumn::make('city.name')
             ])
             ->filters([
                 //

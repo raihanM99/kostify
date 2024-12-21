@@ -41,6 +41,11 @@ class BoardingHouse extends Model
         return $this->hasMany(Room::class);
     }
 
+    public function roomImages()
+    {
+        return $this->hasManyThrough(RoomImage::class, Room::class);
+    }
+
     public function bonuses()
     {
         return $this->hasMany(Bonus::class);
@@ -62,14 +67,19 @@ class BoardingHouse extends Model
     public function getFormattedPriceAttribute(): string
     {
         // Format the price in IDR (Rp)
-        return Money::IDR($this->price)->format(); // Example: Rp12,345.00
+        return Money::IDR($this->price, true)->format();
+    }
+
+    public function getPriceAttribute($value): string
+    {
+        return $value / 100;
     }
 
     // Mutator to save the price in cents (as an integer)
     public function setPriceAttribute($value): void
     {
         // Store price in cents
-        $this->attributes['price'] = intval(floatval($value) * 100); // Convert to cents
+        $this->attributes['price'] = intval(floatval($value) * 100);
     }
     // END: Methods
 }
