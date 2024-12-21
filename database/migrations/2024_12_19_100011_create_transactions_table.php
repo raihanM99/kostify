@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('boarding_house_id')->constrained();
-            $table->foreignId('room_id')->constrained();
+            $table->foreignId('boarding_house_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('room_id')->constrained()->cascadeOnDelete();
             $table->integer('code');
             $table->string('name');
             $table->string('email');

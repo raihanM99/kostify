@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('boarding_houses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('city_id')->constrained();
-            $table->foreignId('category_id')->constrained();
+            $table->foreignId('city_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('category_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('slug');
             $table->string('thumbnail');
