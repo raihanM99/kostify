@@ -17,9 +17,10 @@ class BoardingHouse extends Model
     {
         static::deleting(function ($boardingHouse) {
             $image = $boardingHouse->thumbnail;
+            $publicStorage = Storage::disk('public');
 
-            if ($image && Storage::disk('public')->exists($image)) {
-                Storage::disk('public')->delete($image);
+            if ($image && $publicStorage->exists($image)) {
+                $publicStorage->delete($image);
             }
         });
     }
