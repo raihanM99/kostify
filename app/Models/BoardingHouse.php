@@ -5,22 +5,25 @@ namespace App\Models;
 use Cknow\Money\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class BoardingHouse extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $guarded = ['id', 'created_at', 'updated_at'];
 
     protected static function booted()
     {
         static::deleting(function ($boardingHouse) {
-            $image = $boardingHouse->thumbnail;
-            $publicStorage = Storage::disk('public');
+            if ($boardingHouse->forceDeleting) {
+                $image = $boardingHouse->thumbnail;
+                $publicStorage = Storage::disk('public');
 
-            if ($image && $publicStorage->exists($image)) {
-                $publicStorage->delete($image);
+                if ($image && $publicStorage->exists($image)) {
+                    $publicStorage->delete($image);
+                }
             }
         });
     }
