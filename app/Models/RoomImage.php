@@ -2,17 +2,27 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class RoomImage extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'room_id',
-        'image'
-    ];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+
+    protected static function booted()
+    {
+        static::deleting(function ($roomImage) {
+            $image = $roomImage->image;
+            $publicStorage = Storage::disk('public');
+
+            if ($image && $publicStorage->exists($image)) {
+                $publicStorage->delete($image);
+            }
+        });
+    }
 
     public function room()
     {
