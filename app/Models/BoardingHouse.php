@@ -70,6 +70,11 @@ class BoardingHouse extends Model
         return Money::IDR($this->price, true)->format();
     }
 
+    public function getImageAttribute($value)
+    {
+        return $this->thumbnail;
+    }
+
     public function getPriceAttribute($value): string
     {
         return $value / 100;
