@@ -10,12 +10,7 @@ class Testimonial extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'boarding_house_id',
-        'photo',
-        'rating',
-        'content'
-    ];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
 
     public function boardingHouse()
     {
